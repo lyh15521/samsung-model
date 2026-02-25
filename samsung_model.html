@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三星电子财务模型 | Samsung Financial Model</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2c5282;
+            --accent: #3182ce;
+            --success: #38a169;
+            --warning: #d69e2e;
+            --danger: #e53e3e;
+            --bg: #f7fafc;
+            --card: #ffffff;
+            --text: #2d3748;
+            --text-muted: #718096;
+            --border: #e2e8f0;
+            --input-yellow: #fefcbf;
+            --input-yellow-border: #d69e2e;
+            --formula-bg: #ebf8ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(26, 54, 93, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        /* Legend */
+        .legend-bar {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            background: var(--card);
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .legend-box {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        
+        .legend-box.editable {
+            background: var(--input-yellow);
+            border-color: var(--input-yellow-border);
+        }
+        
+        .legend-box.calculated {
+            background: var(--formula-bg);
+            border-color: var(--accent);
+        }
+        
+        /* Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .metric-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'SF Mono', monospace;
+        }
+        
+        .metric-unit {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+        
+        .metric-input {
+            width: 100%;
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'SF Mono', monospace;
+            background: var(--input-yellow);
+            border: 2px solid var(--input-yellow-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            text-align: center;
+            color: var(--primary);
+            transition: all 0.2s;
+        }
+        
+        .metric-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+        }
+        
+        /* Sections */
+        .sections {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .section-header.blue {
+            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+        }
+        
+        .section-header.green {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        }
+        
+        .section-header.orange {
+            background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%);
+        }
+        
+        .section-header.purple {
+            background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
+        }
+        
+        .section-content {
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+        }
+        
+        th {
+            background: #f7fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid var(--border);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        
+        tr:hover td {
+            background: #f7fafc;
+        }
+        
+        .row-total td {
+            font-weight: 600;
+            background: #f7fafc;
+            border-top: 2px solid var(--border);
+        }
+        
+        .row-section td {
+            background: #edf2f7;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        /* Cells */
+        .cell-label {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .cell-value {
+            font-family: 'SF Mono', monospace;
+            text-align: right;
+            color: var(--text);
+        }
+        
+        .cell-formula {
+            background: var(--formula-bg);
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .input-cell {
+            width: 100%;
+            background: var(--input-yellow);
+            border: 2px solid var(--input-yellow-border);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-family: 'SF Mono', monospace;
+            font-size: 13px;
+            text-align: right;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+        
+        .input-cell:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+        }
+        
+        .pct-positive {
+            color: var(--success);
+        }
+        
+        .pct-negative {
+            color: var(--danger);
+        }
+        
+        /* Full width section */
+        .section-full {
+            grid-column: 1 / -1;
+        }
+        
+        /* Auto update indicator */
+        .auto-update {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 12px;
+        }
+        
+        .auto-update-dot {
+            width: 8px;
+            height: 8px;
+            background: #48bb78;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .last-updated {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-left: 8px;
+        }
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .sections {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 16px;
+            }
+        }
+        
+        /* Highlight animation */
+        @keyframes highlight {
+            0% { background-color: rgba(49, 130, 206, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
+        .updated {
+            animation: highlight 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏢 三星电子财务模型</h1>
+            <div class="header-subtitle">Samsung Electronics Financial Model | 基于 Excel 钩稽关系构建</div>
+            <div class="auto-update">
+                <span class="auto-update-dot"></span>
+                <span>股价自动更新 (KRX 收盘)</span>
+                <span class="last-updated" id="lastUpdated"></span>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend-bar">
+            <div class="legend-item">
+                <div class="legend-box editable"></div>
+                <span>可编辑输入 (黄色单元格)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box calculated"></div>
+                <span>公式计算结果</span>
+            </div>
+        </div>
+
+        <!-- Key Metrics Dashboard -->
+        <div class="dashboard">
+            <div class="metric-card">
+                <div class="metric-label">市值 Market Cap</div>
+                <input type="number" class="metric-input" id="marketCap" value="1213.52577401" step="0.01">
+                <span class="metric-unit">亿美元</span>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">股价 Stock Price</div>
+                <input type="number" class="metric-input" id="stockPrice" value="205000" step="1">
+                <span class="metric-unit">KRW</span>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">汇率 USDKRW</div>
+                <input type="number" class="metric-input" id="usdKrw" value="1449.0169" step="0.0001">
+                <span class="metric-unit">won/$</span>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">总股本 Shares</div>
+                <input type="number" class="metric-input" id="shares" value="5.888" step="0.001">
+                <span class="metric-unit">bn shares</span>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">PE Ratio 2025A</div>
+                <div class="metric-value" id="pe25">-</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">PE Ratio 2026E</div>
+                <div class="metric-value" id="pe26">-</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">PE Ratio 2027E</div>
+                <div class="metric-value" id="pe27">-</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">EPS 2027E</div>
+                <div class="metric-value" id="eps27">-</div>
+            </div>
+        </div>
+
+        <div class="sections">
+            <!-- Revenue Model -->
+            <div class="section">
+                <div class="section-header blue">
+                    <span>收入模型 Revenue Model (万亿韩元)</span>
+                </div>
+                <div class="section-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>业务板块</th>
+                                <th>2024A</th>
+                                <th>2025A</th>
+                                <th>2026E</th>
+                                <th>2027E</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="row-total">
+                                <td class="cell-label">Total Revenue</td>
+                                <td class="cell-value">300.9</td>
+                                <td class="cell-value">333.6</td>
+                                <td class="cell-value cell-formula" id="rev26">-</td>
+                                <td class="cell-value cell-formula" id="rev27">-</td>
+                            </tr>
+                            <tr class="row-section">
+                                <td class="cell-label">DX (Device eXperience)</td>
+                                <td class="cell-value">174.9</td>
+                                <td class="cell-value">188.0</td>
+                                <td class="cell-value cell-formula" id="dx26">-</td>
+                                <td class="cell-value cell-formula" id="dx27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;MX + NW</td>
+                                <td class="cell-value cell-formula" id="mxnw24">-</td>
+                                <td class="cell-value cell-formula" id="mxnw25">-</td>
+                                <td class="cell-value">130.237</td>
+                                <td class="cell-value">138.318</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;&nbsp;&nbsp;MX</td>
+                                <td class="cell-value">114.4</td>
+                                <td class="cell-value">126.5</td>
+                                <td class="cell-value cell-formula" id="mx26">-</td>
+                                <td class="cell-value cell-formula" id="mx27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;&nbsp;&nbsp;NW</td>
+                                <td class="cell-value cell-formula" id="nw24">-</td>
+                                <td class="cell-value cell-formula" id="nw25">-</td>
+                                <td class="cell-value cell-formula" id="nw26">-</td>
+                                <td class="cell-value cell-formula" id="nw27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;VD + DA</td>
+                                <td class="cell-value cell-formula" id="vdda24">-</td>
+                                <td class="cell-value cell-formula" id="vdda25">-</td>
+                                <td class="cell-value">59.892</td>
+                                <td class="cell-value">60.979</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;&nbsp;&nbsp;VD</td>
+                                <td class="cell-value">30.9</td>
+                                <td class="cell-value">30.9</td>
+                                <td class="cell-value cell-formula" id="vd26">-</td>
+                                <td class="cell-value cell-formula" id="vd27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;&nbsp;&nbsp;DA</td>
+                                <td class="cell-value cell-formula" id="da24">-</td>
+                                <td class="cell-value cell-formula" id="da25">-</td>
+                                <td class="cell-value cell-formula" id="da26">-</td>
+                                <td class="cell-value cell-formula" id="da27">-</td>
+                            </tr>
+                            <tr class="row-section">
+                                <td class="cell-label">DS (Device Solutions)</td>
+                                <td class="cell-value">111.1</td>
+                                <td class="cell-value">130.1</td>
+                                <td class="cell-value cell-formula" id="ds26">-</td>
+                                <td class="cell-value cell-formula" id="ds27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;Memory</td>
+                                <td class="cell-value">84.5</td>
+                                <td class="cell-value">104.1</td>
+                                <td class="cell-value cell-formula" id="memRev26">-</td>
+                                <td class="cell-value cell-formula" id="memRev27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;S.LSI / Foundry</td>
+                                <td class="cell-value cell-formula" id="lsiRev24">-</td>
+                                <td class="cell-value cell-formula" id="lsiRev25">-</td>
+                                <td class="cell-value">29.0</td>
+                                <td class="cell-value">34.0</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">SDC</td>
+                                <td class="cell-value">29.2</td>
+                                <td class="cell-value">29.8</td>
+                                <td class="cell-value">29.654</td>
+                                <td class="cell-value">29.117</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Harman</td>
+                                <td class="cell-value">14.3</td>
+                                <td class="cell-value">15.8</td>
+                                <td class="cell-value">16.696</td>
+                                <td class="cell-value">17.531</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Others</td>
+                                <td class="cell-value cell-formula" id="others24">-</td>
+                                <td class="cell-value cell-formula" id="others25">-</td>
+                                <td class="cell-value">-28.0</td>
+                                <td class="cell-value">-30.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Operating Profit -->
+            <div class="section">
+                <div class="section-header green">
+                    <span>营业利润 Operating Profit (万亿韩元)</span>
+                </div>
+                <div class="section-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>业务板块</th>
+                                <th>2024A</th>
+                                <th>2025A</th>
+                                <th>2026E</th>
+                                <th>2027E</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="row-total">
+                                <td class="cell-label">Total Operating Profit</td>
+                                <td class="cell-value cell-formula" id="op24">-</td>
+                                <td class="cell-value cell-formula" id="op25">-</td>
+                                <td class="cell-value cell-formula" id="op26">-</td>
+                                <td class="cell-value cell-formula" id="op27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">DX</td>
+                                <td class="cell-value">12.4</td>
+                                <td class="cell-value">12.9</td>
+                                <td class="cell-value cell-formula" id="dxOp26">-</td>
+                                <td class="cell-value cell-formula" id="dxOp27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;MX + NW</td>
+                                <td class="cell-value">10.6</td>
+                                <td class="cell-value">12.9</td>
+                                <td class="cell-value">8.0</td>
+                                <td class="cell-value">8.0</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;VD + DA</td>
+                                <td class="cell-value">1.7</td>
+                                <td class="cell-value">-0.2</td>
+                                <td class="cell-value">0.61</td>
+                                <td class="cell-value">1.7</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">DS</td>
+                                <td class="cell-value">15.1</td>
+                                <td class="cell-value">24.9</td>
+                                <td class="cell-value cell-formula" id="dsOp26">-</td>
+                                <td class="cell-value cell-formula" id="dsOp27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;Memory</td>
+                                <td class="cell-value">20.173</td>
+                                <td class="cell-value">31.555</td>
+                                <td class="cell-value cell-formula" id="memOp26">-</td>
+                                <td class="cell-value cell-formula" id="memOp27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;S.LSI / Foundry</td>
+                                <td class="cell-value">-5.053</td>
+                                <td class="cell-value">-6.655</td>
+                                <td>
+                                    <input type="number" class="input-cell" id="lsiOp26Input" value="-3" step="0.1">
+                                </td>
+                                <td class="cell-value">-0.5</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">SDC</td>
+                                <td class="cell-value">3.7</td>
+                                <td class="cell-value">4.1</td>
+                                <td class="cell-value">3.5</td>
+                                <td class="cell-value">3.7</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Harman</td>
+                                <td class="cell-value">1.3</td>
+                                <td class="cell-value">1.5</td>
+                                <td class="cell-value">1.3</td>
+                                <td class="cell-value">1.7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- NAND Model -->
+            <div class="section">
+                <div class="section-header orange">
+                    <span>NAND 业务模型</span>
+                </div>
+                <div class="section-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>指标</th>
+                                <th>单位</th>
+                                <th>2025A</th>
+                                <th>2026E</th>
+                                <th>2027E</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="row-total">
+                                <td class="cell-label">NAND Revenue</td>
+                                <td class="cell-value">亿美元</td>
+                                <td class="cell-value cell-formula" id="nandRev25">-</td>
+                                <td class="cell-value cell-formula" id="nandRev26">-</td>
+                                <td class="cell-value cell-formula" id="nandRev27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;ASP</td>
+                                <td class="cell-value">US$/GB</td>
+                                <td class="cell-value">0.08</td>
+                                <td>
+                                    <input type="number" class="input-cell" id="nandAsp26" value="0.20" step="0.01">
+                                </td>
+                                <td>
+                                    <input type="number" class="input-cell" id="nandAsp27" value="0.25" step="0.01">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;EB (出货容量)</td>
+                                <td class="cell-value">EB</td>
+                                <td class="cell-value">305.67</td>
+                                <td>
+                                    <input type="number" class="input-cell" id="nandEb26" value="330" step="1">
+                                </td>
+                                <td>
+                                    <input type="number" class="input-cell" id="nandEb27" value="370" step="1">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;Cost</td>
+                                <td class="cell-value">US$/GB</td>
+                                <td class="cell-value">0.075</td>
+                                <td>
+                                    <input type="number" class="input-cell" id="nandCost26" value="0.078" step="0.001">
+                                </td>
+                                <td>
+                                    <input type="number" class="input-cell" id="nandCost27" value="0.08" step="0.001">
+                                </td>
+                            </tr>
+                            <tr class="row-total">
+                                <td class="cell-label">NAND Operating Profit</td>
+                                <td class="cell-value">亿美元</td>
+                                <td class="cell-value cell-formula" id="nandOp25">-</td>
+                                <td class="cell-value cell-formula" id="nandOp26">-</td>
+                                <td class="cell-value cell-formula" id="nandOp27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;换算为韩元</td>
+                                <td class="cell-value">trn won</td>
+                                <td class="cell-value cell-formula" id="nandOpKrw25">-</td>
+                                <td class="cell-value cell-formula" id="nandOpKrw26">-</td>
+                                <td class="cell-value cell-formula" id="nandOpKrw27">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DRAM Model -->
+            <div class="section">
+                <div class="section-header purple">
+                    <span>DRAM 业务模型</span>
+                </div>
+                <div class="section-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>指标</th>
+                                <th>单位</th>
+                                <th>2025A</th>
+                                <th>2026E</th>
+                                <th>2027E</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="row-total">
+                                <td class="cell-label">DRAM Revenue</td>
+                                <td class="cell-value">亿美元</td>
+                                <td class="cell-value cell-formula" id="dramRev25">-</td>
+                                <td class="cell-value cell-formula" id="dramRev26">-</td>
+                                <td class="cell-value cell-formula" id="dramRev27">-</td>
+                            </tr>
+                            <tr class="row-section">
+                                <td class="cell-label">DDR</td>
+                                <td class="cell-value">亿美元</td>
+                                <td class="cell-value cell-formula" id="ddrRev25">-</td>
+                                <td class="cell-value cell-formula" id="ddrRev26">-</td>
+                                <td class="cell-value cell-formula" id="ddrRev27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;Volume</td>
+                                <td class="cell-value">million Gb</td>
+                                <td class="cell-value">115,924</td>
+                                <td class="cell-value">130,028</td>
+                                <td class="cell-value">148,395</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;ASP</td>
+                                <td class="cell-value">US$/Gb</td>
+                                <td class="cell-value">0.39</td>
+                                <td>
+                                    <input type="number" class="input-cell" id="ddrAsp26" value="1.50" step="0.01">
+                                </td>
+                                <td>
+                                    <input type="number" class="input-cell" id="ddrAsp27" value="1.80" step="0.01">
+                                </td>
+                            </tr>
+                            <tr class="row-section">
+                                <td class="cell-label">HBM</td>
+                                <td class="cell-value">亿美元</td>
+                                <td class="cell-value cell-formula" id="hbmRev25">-</td>
+                                <td class="cell-value cell-formula" id="hbmRev26">-</td>
+                                <td class="cell-value cell-formula" id="hbmRev27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;Volume</td>
+                                <td class="cell-value">million Gb</td>
+                                <td class="cell-value">4,327</td>
+                                <td class="cell-value">9,514</td>
+                                <td class="cell-value">14,974</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">&nbsp;&nbsp;ASP</td>
+                                <td class="cell-value">US$/Gb</td>
+                                <td class="cell-value">1.26</td>
+                                <td>
+                                    <input type="number" class="input-cell" id="hbmAsp26" value="2.00" step="0.01">
+                                </td>
+                                <td>
+                                    <input type="number" class="input-cell" id="hbmAsp27" value="2.50" step="0.01">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">DRAM Cost</td>
+                                <td class="cell-value">US$/Gb</td>
+                                <td class="cell-value">0.244</td>
+                                <td class="cell-value">0.27</td>
+                                <td class="cell-value">0.28</td>
+                            </tr>
+                            <tr class="row-total">
+                                <td class="cell-label">DRAM Operating Profit</td>
+                                <td class="cell-value">trn won</td>
+                                <td class="cell-value cell-formula" id="dramOpKrw25">-</td>
+                                <td class="cell-value cell-formula" id="dramOpKrw26">-</td>
+                                <td class="cell-value cell-formula" id="dramOpKrw27">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Net Income Calculation -->
+            <div class="section section-full">
+                <div class="section-header">
+                    <span>净利润计算路径 Net Income Calculation (万亿韩元)</span>
+                </div>
+                <div class="section-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>项目</th>
+                                <th>2025A</th>
+                                <th>2026E</th>
+                                <th>2027E</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="cell-label">Operating Profit</td>
+                                <td class="cell-value cell-formula" id="niOp25">-</td>
+                                <td class="cell-value cell-formula" id="niOp26">-</td>
+                                <td class="cell-value cell-formula" id="niOp27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Non-operating Profit</td>
+                                <td class="cell-value">5.88</td>
+                                <td class="cell-value">5.6</td>
+                                <td class="cell-value">5.7</td>
+                            </tr>
+                            <tr class="row-total">
+                                <td class="cell-label">PBT (税前利润)</td>
+                                <td class="cell-value cell-formula" id="pbt25">-</td>
+                                <td class="cell-value cell-formula" id="pbt26">-</td>
+                                <td class="cell-value cell-formula" id="pbt27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Tax</td>
+                                <td class="cell-value">-0.088</td>
+                                <td class="cell-value">-0.26</td>
+                                <td class="cell-value">-0.26</td>
+                            </tr>
+                            <tr class="row-total">
+                                <td class="cell-label">PAT (税后利润)</td>
+                                <td class="cell-value cell-formula" id="pat25">-</td>
+                                <td class="cell-value cell-formula" id="pat26">-</td>
+                                <td class="cell-value cell-formula" id="pat27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Minority Interest</td>
+                                <td class="cell-value">0.946</td>
+                                <td class="cell-value">0.5</td>
+                                <td class="cell-value">0.5</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Preferred Dividends</td>
+                                <td class="cell-value">1.4</td>
+                                <td class="cell-value">7.0</td>
+                                <td class="cell-value">10.7</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Undeclared Pref. Dividend</td>
+                                <td class="cell-value cell-formula" id="undeclared25">-</td>
+                                <td class="cell-value cell-formula" id="undeclared26">-</td>
+                                <td class="cell-value cell-formula" id="undeclared27">-</td>
+                            </tr>
+                            <tr class="row-total">
+                                <td class="cell-label"><strong>Net Income (归属股东)</strong></td>
+                                <td class="cell-value cell-formula" id="ni25">-</td>
+                                <td class="cell-value cell-formula" id="ni26">-</td>
+                                <td class="cell-value cell-formula" id="ni27">-</td>
+                            </tr>
+                            <tr>
+                                <td class="cell-label">Shares Outstanding</td>
+                                <td class="cell-value">5.888</td>
+                                <td class="cell-value">5.888</td>
+                                <td class="cell-value">5.888</td>
+                            </tr>
+                            <tr class="row-total">
+                                <td class="cell-label"><strong>EPS</strong></td>
+                                <td class="cell-value cell-formula" id="eps25">-</td>
+                                <td class="cell-value cell-formula" id="eps26">-</td>
+                                <td class="cell-value cell-formula" id="eps27Calc">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 格式化数字
+        function formatNum(num, decimals = 2) {
+            if (num === null || num === undefined || isNaN(num)) return '-';
+            return num.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        // 核心计算函数
+        function calculate() {
+            // 获取输入值
+            const marketCap = parseFloat(document.getElementById('marketCap').value) || 1213.52577401;
+            const stockPrice = parseFloat(document.getElementById('stockPrice').value) || 205000;
+            const usdKrw = parseFloat(document.getElementById('usdKrw').value) || 1449.0169;
+            const shares = parseFloat(document.getElementById('shares').value) || 5.888;
+
+            // ===== NAND 输入 =====
+            // 2025A是实际数据，使用固定值
+            const nandAsp25 = 0.08;
+            const nandAsp26 = parseFloat(document.getElementById('nandAsp26').value) || 0.20;
+            const nandAsp27 = parseFloat(document.getElementById('nandAsp27').value) || 0.25;
+            const nandEb25 = 305.67;
+            const nandEb26 = parseFloat(document.getElementById('nandEb26').value) || 330;
+            const nandEb27 = parseFloat(document.getElementById('nandEb27').value) || 370;
+            const nandCost25 = 0.075;
+            const nandCost26 = parseFloat(document.getElementById('nandCost26').value) || 0.078;
+            const nandCost27 = parseFloat(document.getElementById('nandCost27').value) || 0.08;
+
+            // ===== DRAM 输入 =====
+            // 2025A是实际数据，使用固定值
+            const ddrAsp25 = 0.39;
+            const ddrAsp26 = parseFloat(document.getElementById('ddrAsp26').value) || 1.50;
+            const ddrAsp27 = parseFloat(document.getElementById('ddrAsp27').value) || 1.80;
+            const hbmAsp25 = 1.26;
+            const hbmAsp26 = parseFloat(document.getElementById('hbmAsp26').value) || 2.00;
+            const hbmAsp27 = parseFloat(document.getElementById('hbmAsp27').value) || 2.50;
+
+            // ===== LSI Op 输入 =====
+            const lsiOp26 = parseFloat(document.getElementById('lsiOp26Input').value) || -3;
+
+            // ===== 固定值 =====
+            const ddrVol25 = 115924;
+            const ddrVol26 = 130028;
+            const ddrVol27 = 148395;
+            const hbmVol25 = 4327;
+            const hbmVol26 = 9514;
+            const hbmVol27 = 14974;
+            const dramCost25 = 0.244;
+            const dramCost26 = 0.27;
+            const dramCost27 = 0.28;
+
+            // ===== NAND 计算 =====
+            // NAND Revenue = ASP * EB * 10
+            const nandRev25 = nandAsp25 * nandEb25 * 10;
+            const nandRev26 = nandAsp26 * nandEb26 * 10;
+            const nandRev27 = nandAsp27 * nandEb27 * 10;
+
+            // NAND Operating Profit = EB * (ASP - Cost) * 10
+            const nandOp25 = nandEb25 * (nandAsp25 - nandCost25) * 10;
+            const nandOp26 = nandEb26 * (nandAsp26 - nandCost26) * 10;
+            const nandOp27 = nandEb27 * (nandAsp27 - nandCost27) * 10;
+
+            // NAND Op in KRW
+            const nandOpKrw25 = nandOp25 * usdKrw / 10000;
+            const nandOpKrw26 = nandOp26 * usdKrw / 10000;
+            const nandOpKrw27 = nandOp27 * usdKrw / 10000;
+
+            // ===== DRAM 计算 =====
+            // DDR Revenue = Volume * ASP / 100
+            const ddrRev25 = ddrVol25 * ddrAsp25 / 100;
+            const ddrRev26 = ddrVol26 * ddrAsp26 / 100;
+            const ddrRev27 = ddrVol27 * ddrAsp27 / 100;
+
+            // HBM Revenue = Volume * ASP / 100
+            const hbmRev25 = hbmVol25 * hbmAsp25 / 100;
+            const hbmRev26 = hbmVol26 * hbmAsp26 / 100;
+            const hbmRev27 = hbmVol27 * hbmAsp27 / 100;
+
+            // Total DRAM Revenue
+            const dramRev25 = ddrRev25 + hbmRev25;
+            const dramRev26 = ddrRev26 + hbmRev26;
+            const dramRev27 = ddrRev27 + hbmRev27;
+
+            // DRAM Total Volume
+            const dramVol25 = ddrVol25 + hbmVol25;
+            const dramVol26 = ddrVol26 + hbmVol26;
+            const dramVol27 = ddrVol27 + hbmVol27;
+
+            // DRAM Blended ASP
+            const dramAsp25 = dramRev25 / dramVol25 * 100;
+            const dramAsp26 = dramRev26 / dramVol26 * 100;
+            const dramAsp27 = dramRev27 / dramVol27 * 100;
+
+            // DRAM Operating Profit = Volume * (ASP - Cost) / 100
+            const dramOp25 = dramVol25 * (dramAsp25 - dramCost25) / 100;
+            const dramOp26 = dramVol26 * (dramAsp26 - dramCost26) / 100;
+            const dramOp27 = dramVol27 * (dramAsp27 - dramCost27) / 100;
+
+            // DRAM Op in KRW
+            const dramOpKrw25 = dramOp25 * usdKrw / 10000;
+            const dramOpKrw26 = dramOp26 * usdKrw / 10000;
+            const dramOpKrw27 = dramOp27 * usdKrw / 10000;
+
+            // ===== 收入汇总 =====
+            // MX + NW
+            const mxnw24 = 114.4 + (117.3 - 114.4);
+            const mxnw25 = 126.5 + (129.5 - 126.5);
+
+            // VD + DA
+            const vdda24 = 30.9 + (56.5 - 30.9);
+            const vdda25 = 30.9 + (57.3 - 30.9);
+
+            // DX
+            const dx26 = 130.237 + 59.892;
+            const dx27 = 138.318 + 60.979;
+
+            // Memory Revenue in KRW
+            const memRev26 = (nandRev26 + dramRev26) * usdKrw / 10000;
+            const memRev27 = (nandRev27 + dramRev27) * usdKrw / 10000;
+
+            // DS
+            const ds26 = memRev26 + 29.0;
+            const ds27 = memRev27 + 34.0;
+
+            // Total Revenue
+            const rev26 = dx26 + ds26 + 29.654 + 16.696 - 28.0;
+            const rev27 = dx27 + ds27 + 29.117 + 17.531 - 30.0;
+
+            // ===== 营业利润汇总 =====
+            // DX Op
+            const dxOp26 = 8.0 + 0.61;
+            const dxOp27 = 8.0 + 1.7;
+
+            // DS Op
+            const dsOp26 = nandOpKrw26 + dramOpKrw26 + lsiOp26;
+            const dsOp27 = nandOpKrw27 + dramOpKrw27 + (-0.5);
+
+            // Total Op
+            const op25 = 12.9 + 24.9 + 4.1 + 1.5;
+            const op26 = dxOp26 + dsOp26 + 3.5 + 1.3;
+            const op27 = dxOp27 + dsOp27 + 3.7 + 1.7;
+
+            // Memory Op
+            const memOp26 = nandOpKrw26 + dramOpKrw26;
+            const memOp27 = nandOpKrw27 + dramOpKrw27;
+
+            // ===== 净利润计算 =====
+            // PBT
+            const pbt25 = op25 + 5.88;
+            const pbt26 = op26 + 5.6;
+            const pbt27 = op27 + 5.7;
+
+            // PAT (Tax rate)
+            const pat25 = pbt25 * (1 - 0.088);
+            const pat26 = pbt26 * (1 - 0.26);
+            const pat27 = pbt27 * (1 - 0.26);
+
+            // Undeclared dividend
+            const undeclared25 = pat25 * 0.12;
+            const undeclared26 = pat26 * 0.11;
+            const undeclared27 = pat27 * 0.11;
+
+            // Net Income
+            const ni25 = pat25 - 0.946 - 1.4 - undeclared25;
+            const ni26 = pat26 - 0.5 - 7.0 - undeclared26;
+            const ni27 = pat27 - 0.5 - 10.7 - undeclared27;
+
+            // EPS
+            const eps25 = ni25 * 1000 / shares;
+            const eps26 = ni26 * 1000 / shares;
+            const eps27 = ni27 * 1000 / shares;
+
+            // PE - 按照Excel公式: PE25 = D2/E39, PE26 = D2/F38, PE27 = D2/G38
+            const pe24 = stockPrice / 6462;  // E39 = 6462
+            const pe25 = stockPrice / eps25;
+            const pe26 = stockPrice / eps26;
+            const pe27 = stockPrice / eps27;
+
+            // ===== 更新 UI =====
+            // Dashboard
+            document.getElementById('pe25').textContent = formatNum(pe25, 2);
+            document.getElementById('pe26').textContent = formatNum(pe26, 2);
+            document.getElementById('pe27').textContent = formatNum(pe27, 2);
+            document.getElementById('eps27').textContent = formatNum(eps27, 0);
+
+            // Revenue
+            document.getElementById('rev26').textContent = formatNum(rev26, 1);
+            document.getElementById('rev27').textContent = formatNum(rev27, 1);
+            document.getElementById('dx26').textContent = formatNum(dx26, 1);
+            document.getElementById('dx27').textContent = formatNum(dx27, 1);
+            document.getElementById('mxnw24').textContent = formatNum(mxnw24, 1);
+            document.getElementById('mxnw25').textContent = formatNum(mxnw25, 1);
+            document.getElementById('mx26').textContent = formatNum(126.5, 1);
+            document.getElementById('mx27').textContent = formatNum(138.318 - (129.5 - 126.5), 1);
+            document.getElementById('nw24').textContent = formatNum(117.3 - 114.4, 1);
+            document.getElementById('nw25').textContent = formatNum(129.5 - 126.5, 1);
+            document.getElementById('nw26').textContent = formatNum(129.5 - 126.5, 1);
+            document.getElementById('nw27').textContent = formatNum(129.5 - 126.5, 1);
+            document.getElementById('vdda24').textContent = formatNum(vdda24, 1);
+            document.getElementById('vdda25').textContent = formatNum(vdda25, 1);
+            document.getElementById('vd26').textContent = formatNum(30.9, 1);
+            document.getElementById('vd27').textContent = formatNum(30.9, 1);
+            document.getElementById('da24').textContent = formatNum(56.5 - 30.9, 1);
+            document.getElementById('da25').textContent = formatNum(57.3 - 30.9, 1);
+            document.getElementById('da26').textContent = formatNum(57.3 - 30.9, 1);
+            document.getElementById('da27').textContent = formatNum(57.3 - 30.9, 1);
+            document.getElementById('ds26').textContent = formatNum(ds26, 1);
+            document.getElementById('ds27').textContent = formatNum(ds27, 1);
+            document.getElementById('memRev26').textContent = formatNum(memRev26, 1);
+            document.getElementById('memRev27').textContent = formatNum(memRev27, 1);
+            document.getElementById('lsiRev24').textContent = formatNum(111.1 - 84.5, 1);
+            document.getElementById('lsiRev25').textContent = formatNum(130.1 - 104.1, 1);
+            document.getElementById('others24').textContent = formatNum(300.9 - 29.2 - 14.3 - 111.1 - 174.9, 1);
+            document.getElementById('others25').textContent = formatNum(333.6 - 29.8 - 15.8 - 130.1 - 188, 1);
+
+            // Operating Profit
+            document.getElementById('op24').textContent = formatNum(12.4 + 15.1 + 3.7 + 1.3, 1);
+            document.getElementById('op25').textContent = formatNum(op25, 1);
+            document.getElementById('op26').textContent = formatNum(op26, 1);
+            document.getElementById('op27').textContent = formatNum(op27, 1);
+            document.getElementById('dxOp26').textContent = formatNum(dxOp26, 2);
+            document.getElementById('dxOp27').textContent = formatNum(dxOp27, 2);
+            document.getElementById('dsOp26').textContent = formatNum(dsOp26, 2);
+            document.getElementById('dsOp27').textContent = formatNum(dsOp27, 2);
+            document.getElementById('memOp26').textContent = formatNum(memOp26, 2);
+            document.getElementById('memOp27').textContent = formatNum(memOp27, 2);
+
+            // NAND
+            document.getElementById('nandRev25').textContent = formatNum(nandRev25, 1);
+            document.getElementById('nandRev26').textContent = formatNum(nandRev26, 1);
+            document.getElementById('nandRev27').textContent = formatNum(nandRev27, 1);
+            document.getElementById('nandOp25').textContent = formatNum(nandOp25, 1);
+            document.getElementById('nandOp26').textContent = formatNum(nandOp26, 1);
+            document.getElementById('nandOp27').textContent = formatNum(nandOp27, 1);
+            document.getElementById('nandOpKrw25').textContent = formatNum(nandOpKrw25, 2);
+            document.getElementById('nandOpKrw26').textContent = formatNum(nandOpKrw26, 2);
+            document.getElementById('nandOpKrw27').textContent = formatNum(nandOpKrw27, 2);
+
+            // DRAM
+            document.getElementById('dramRev25').textContent = formatNum(dramRev25, 1);
+            document.getElementById('dramRev26').textContent = formatNum(dramRev26, 1);
+            document.getElementById('dramRev27').textContent = formatNum(dramRev27, 1);
+            document.getElementById('ddrRev25').textContent = formatNum(ddrRev25, 1);
+            document.getElementById('ddrRev26').textContent = formatNum(ddrRev26, 1);
+            document.getElementById('ddrRev27').textContent = formatNum(ddrRev27, 1);
+            document.getElementById('hbmRev25').textContent = formatNum(hbmRev25, 1);
+            document.getElementById('hbmRev26').textContent = formatNum(hbmRev26, 1);
+            document.getElementById('hbmRev27').textContent = formatNum(hbmRev27, 1);
+            document.getElementById('dramOpKrw25').textContent = formatNum(dramOpKrw25, 2);
+            document.getElementById('dramOpKrw26').textContent = formatNum(dramOpKrw26, 2);
+            document.getElementById('dramOpKrw27').textContent = formatNum(dramOpKrw27, 2);
+
+            // Net Income
+            document.getElementById('niOp25').textContent = formatNum(op25, 1);
+            document.getElementById('niOp26').textContent = formatNum(op26, 1);
+            document.getElementById('niOp27').textContent = formatNum(op27, 1);
+            document.getElementById('pbt25').textContent = formatNum(pbt25, 1);
+            document.getElementById('pbt26').textContent = formatNum(pbt26, 1);
+            document.getElementById('pbt27').textContent = formatNum(pbt27, 1);
+            document.getElementById('pat25').textContent = formatNum(pat25, 1);
+            document.getElementById('pat26').textContent = formatNum(pat26, 1);
+            document.getElementById('pat27').textContent = formatNum(pat27, 1);
+            document.getElementById('undeclared25').textContent = formatNum(undeclared25, 2);
+            document.getElementById('undeclared26').textContent = formatNum(undeclared26, 2);
+            document.getElementById('undeclared27').textContent = formatNum(undeclared27, 2);
+            document.getElementById('ni25').textContent = formatNum(ni25, 1);
+            document.getElementById('ni26').textContent = formatNum(ni26, 1);
+            document.getElementById('ni27').textContent = formatNum(ni27, 1);
+            document.getElementById('eps25').textContent = formatNum(eps25, 0);
+            document.getElementById('eps26').textContent = formatNum(eps26, 0);
+            document.getElementById('eps27Calc').textContent = formatNum(eps27, 0);
+        }
+
+        // 从免费API获取实时股价数据
+        async function loadStockData() {
+            // 内置默认数据
+            const defaultData = {
+                symbol: '005930.KS',
+                bloomberg_code: '005930 KS Equity',
+                name: 'Samsung Electronics Co., Ltd.',
+                price_krw: 205000,
+                market_cap_usd: 1213.53,
+                previous_close: 200000,
+                open: 202500,
+                high: 206000,
+                low: 201000,
+                currency: 'KRW',
+                exchange: 'KRX',
+                updated_at: '2024-01-01 15:30:00'
+            };
+            
+            try {
+                // 尝试从多个免费API获取实时数据
+                const stockData = await fetchRealTimeStockData();
+                if (stockData && stockData.price_krw > 0) {
+                    updateStockUI(stockData);
+                    console.log('Real-time stock data loaded:', stockData);
+                } else {
+                    updateStockUI(defaultData);
+                }
+            } catch (error) {
+                console.log('Using default stock data:', error);
+                updateStockUI(defaultData);
+            }
+        }
+        
+        // 获取实时股价 - 使用免费API
+        async function fetchRealTimeStockData() {
+            // 尝试多个免费数据源
+            const apis = [
+                // 使用 twelvedata 免费层 (需要API key，这里使用备用方案)
+                // 使用 Alpha Vantage 免费层 (需要API key)
+                // 使用 Yahoo Finance 代理
+                async () => {
+                    // 使用 allorigins 代理访问 Yahoo Finance
+                    const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/005930.KS?interval=1d&range=1d');
+                    const response = await fetch(url, { timeout: 10000 });
+                    const data = await response.json();
+                    const meta = data.chart.result[0].meta;
+                    return {
+                        price_krw: meta.regularMarketPrice || 0,
+                        previous_close: meta.previousClose || 0,
+                        open: meta.regularMarketDayOpen || 0,
+                        high: meta.regularMarketDayHigh || 0,
+                        low: meta.regularMarketDayLow || 0,
+                        updated_at: new Date().toLocaleString('zh-CN')
+                    };
+                },
+                // 备用：使用 investing.com API (延迟数据)
+                async () => {
+                    // 使用备用数据源
+                    return null;
+                }
+            ];
+            
+            for (const api of apis) {
+                try {
+                    const result = await api();
+                    if (result && result.price_krw > 0) {
+                        // 计算市值
+                        const shares = 5.968; // billion shares
+                        result.market_cap_usd = Math.round(result.price_krw * shares / 1300) / 100;
+                        return result;
+                    }
+                } catch (e) {
+                    console.log('API failed:', e);
+                    continue;
+                }
+            }
+            return null;
+        }
+        
+        function updateStockUI(data) {
+            // 更新股价输入框
+            if (data.price_krw > 0) {
+                document.getElementById('stockPrice').value = data.price_krw;
+            }
+            if (data.market_cap_usd > 0) {
+                document.getElementById('marketCap').value = data.market_cap_usd;
+            }
+            
+            // 更新时间显示
+            if (data.updated_at) {
+                document.getElementById('lastUpdated').textContent = '股价数据: ' + data.updated_at;
+            }
+            
+            // 重新计算
+            calculate();
+        }
+
+        // 绑定事件
+        document.querySelectorAll('.input-cell, .metric-input').forEach(input => {
+            input.addEventListener('input', calculate);
+        });
+
+        // 初始加载和计算
+        loadStockData();
+        calculate();
+        
+        // 每5分钟自动刷新一次
+        setInterval(loadStockData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
